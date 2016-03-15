@@ -49,26 +49,34 @@ class Image {
   {
     switch($mode) {
       case 'resize':
-        return $this->resize($width, $height);
+        $this->resize($width, $height);
       case 'resizeCrop':
       case 'resize_crop':
-        return $this->resizeAndCrop($width, $height);
+        $this->resizeAndCrop($width, $height);
       default:
-        return false;
+        throw new \Exception('Modo de Redimensionamento desconhecido. ['. $mode .']');
     }
   }
 
-  public function save($where, $name = false)
+  /**
+   * @param string $dir deve terminar com trailing slash. (/)
+   * @param string|bool $name (opcional) novo nome a ser dado para o arquivo ao salvá-lo. Se não for informado um nome aleatório gerato por getFilename() será usado.
+   * @return Image ver método _writeImageToDisk()
+   */
+  public function save($dir, $name = false)
   {
-    if(!is_dir($where) or !is_writable($where))
-      throw new \Exception('$path não é um diretório válido.');
+    if(!is_dir($dir))
+      throw new \Exception('Erro ao salvar imagem: $dir não é um diretório válido');
+
+    if(!is_writable($dir))
+      throw new \Exception('Erro ao salvar imagem: Não é possível escrever em $dir. Verifique permissões de escrita');
 
     if($name)
       $this->_filename = $name;
     else
       $name = $this->getFilename();
 
-    $filepath = $where . $name;
+    $filepath = $dir . $name;
     $resource = (empty($this->_edited_resource))? $this->getResource() : $this->_edited_resource;
 
     return $this->_writeImageToDisk($filepath, $resource, $this->getType());
@@ -76,7 +84,7 @@ class Image {
 
   public function open()
   {
-    switch($this->_type) {
+    switch($this->getType()) {
       case IMAGETYPE_JPEG:
         $this->_resource = imagecreatefromjpeg($this->_filepath);
         break;
@@ -84,7 +92,7 @@ class Image {
         $this->_resource = imagecreatefrompng($this->_filepath);
         break;
       default:
-        throw new \Exception('Tipo de Image não suportado.');
+        throw new \Exception('Tipo de Image não suportado. ['. $this->getType() .']');
     }
   }
 
@@ -106,11 +114,11 @@ class Image {
         imagejpeg($resource, $filepath, 80);
         break;
       default:
-        throw new \Exception('Tipo de Imagem inválido.');
+        throw new \Exception('Tipo de Imagem inválido: [' . $type .']');
     }
 
     if(!file_exists($filepath))
-      throw new \Exception('Não foi possível salvar a imagem');
+      throw new \Exception('Houve um problema ao salvar a imagem no disco.');
 
     return new Image($filepath);
   }
