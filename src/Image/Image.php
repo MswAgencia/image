@@ -50,9 +50,11 @@ class Image {
     switch($mode) {
       case 'resize':
         $this->resize($width, $height);
+        break;
       case 'resizeCrop':
       case 'resize_crop':
         $this->resizeAndCrop($width, $height);
+        break;
       default:
         throw new \Exception('Modo de Redimensionamento desconhecido. ['. $mode .']');
     }
