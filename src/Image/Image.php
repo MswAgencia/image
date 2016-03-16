@@ -55,6 +55,9 @@ class Image {
       case 'resize_crop':
         $this->resizeAndCrop($width, $height);
         break;
+      case 'resize_fill':
+        $this->resizeAndFill($width, $height);
+        break;
       default:
         throw new \Exception('Modo de Redimensionamento desconhecido. ['. $mode .']');
     }
@@ -196,6 +199,55 @@ class Image {
       imagealphablending($this->_edited_resource, false);
       imagesavealpha($this->_edited_resource, true);
     }
+    imagecopyresampled($this->_edited_resource, $this->_resource, 0, 0, 0, 0, $applyWidth, $applyHeight, $oldWidth, $oldHeight);
+  }
+
+  public function resizeAndFill($width, $height)
+  {
+    $this->open();
+    $widthScale = 2;
+    $heightScale = 2;
+    $oldWidth = $this->_width;
+    $oldHeight = $this->_height;
+
+    if($newWidth)
+      $widthScale = $newWidth / $oldWidth;
+    if($newHeight)
+      $heightScale = $newHeight / $oldHeight;
+
+    if($widthScale < $heightScale) {
+      $maxWidth = $newWidth;
+      $maxHeight = false;
+    } elseif ($widthScale > $heightScale ) {
+      $maxHeight = $newHeight;
+      $maxWidth = false;
+    } else {
+      $maxHeight = $newHeight;
+      $maxWidth = $newWidth;
+    }
+
+    if($maxWidth > $maxHeight){
+      $applyWidth = $maxWidth;
+      $applyHeight = ($oldHeight * $applyWidth) / $oldWidth;
+    } elseif ($maxHeight > $maxWidth) {
+      $applyHeight = $maxHeight;
+      $applyWidth = ($applyHeight * $oldWidth) / $oldHeight;
+    } else {
+      $applyWidth = $maxWidth;
+      $applyHeight = $maxHeight;
+    }
+
+    $this->_edited_resource = imagecreatetruecolor($width, $height);
+    if($this->_type === IMAGETYPE_PNG) {
+      $backgroundFiller = imagecolorallocatealpha($this->_edited_resource, 0, 0, 0, 127);
+      imagealphablending($this->_edited_resource, false);
+      imagesavealpha($this->_edited_resource, true);
+    }
+    else {
+      $backgroundFiller = imagecolorallocate($this->_edited_resource, 255, 255, 255);
+    }
+
+    imagefill($this->_edited_resource, 0,0, $backgroundFiller);
     imagecopyresampled($this->_edited_resource, $this->_resource, 0, 0, 0, 0, $applyWidth, $applyHeight, $oldWidth, $oldHeight);
   }
 
