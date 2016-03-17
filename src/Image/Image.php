@@ -237,7 +237,7 @@ class Image {
       $applyHeight = $maxHeight;
     }
 
-    $this->_edited_resource = imagecreatetruecolor($width, $height);
+    $this->_edited_resource = imagecreatetruecolor($newWidth, $newHeight);
     if($this->_type === IMAGETYPE_PNG) {
       $backgroundFiller = imagecolorallocatealpha($this->_edited_resource, 0, 0, 0, 127);
       imagealphablending($this->_edited_resource, false);
