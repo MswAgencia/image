@@ -202,7 +202,7 @@ class Image {
     imagecopyresampled($this->_edited_resource, $this->_resource, 0, 0, 0, 0, $applyWidth, $applyHeight, $oldWidth, $oldHeight);
   }
 
-  public function resizeAndFill($width, $height)
+  public function resizeAndFill($newWidth, $newHeight)
   {
     $this->open();
     $widthScale = 2;
@@ -246,9 +246,9 @@ class Image {
     else {
       $backgroundFiller = imagecolorallocate($this->_edited_resource, 255, 255, 255);
     }
-
     imagefill($this->_edited_resource, 0,0, $backgroundFiller);
-    imagecopyresampled($this->_edited_resource, $this->_resource, 0, 0, 0, 0, $applyWidth, $applyHeight, $oldWidth, $oldHeight);
+
+    imagecopyresampled($this->_edited_resource, $this->_resource, (($newWidth - $applyWidth) / 2), (($newHeight - $applyHeight) / 2), 0, 0, $applyWidth, $applyHeight, $oldWidth, $oldHeight);
   }
 
   public function getFilename()
